@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학급 청소당번 뽑기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .draw-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .draw-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .draw-button:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .number-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .number-item {
+            background: linear-gradient(135deg, #38b2ac 0%, #4fd1c7 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(56, 178, 172, 0.3);
+            animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .reset-button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background: #c53030;
+            transform: translateY(-1px);
+        }
+
+        .drawing-animation {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .drawing-animation.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹  봉담중학교 2-5 청소당번 뽑기</h1>
+        <p class="subtitle">1번부터 31번까지 중에서 31명을 랜덤으로 선택합니다</p>
+        
+        <button class="draw-button" onclick="drawNumbers()">청소당번 뽑기</button>
+        
+        <div class="drawing-animation" id="drawingAnimation">
+            <div class="spinner"></div>
+            <p>청소당번을 뽑고 있습니다...</p>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>🎯 선택된 청소당번</h2>
+            <div class="number-list" id="numberList"></div>
+            <button class="reset-button" onclick="resetDraw()">다시 뽑기</button>
+        </div>
+    </div>
+
+    <script>
+        function drawNumbers() {
+            const drawButton = document.querySelector('.draw-button');
+            const drawingAnimation = document.getElementById('drawingAnimation');
+            const results = document.getElementById('results');
+            
+            // 버튼 비활성화 및 애니메이션 시작
+            drawButton.disabled = true;
+            drawingAnimation.classList.add('show');
+            results.classList.remove('show');
+            
+            // 2초 후 결과 표시
+            setTimeout(() => {
+                const selectedNumbers = getRandomNumbers();
+                displayResults(selectedNumbers);
+                
+                drawingAnimation.classList.remove('show');
+                results.classList.add('show');
+                drawButton.disabled = false;
+            }, 2000);
+        }
+
+        function getRandomNumbers() {
+            const numbers = [];
+            const used = new Set();
+            
+            while (numbers.length < 5) {
+                const randomNum = Math.floor(Math.random() * 31) + 1;
+                if (!used.has(randomNum)) {
+                    used.add(randomNum);
+                    numbers.push(randomNum);
+                }
+            }
+            
+            return numbers.sort((a, b) => a - b);
+        }
+
+        function displayResults(numbers) {
+            const numberList = document.getElementById('numberList');
+            numberList.innerHTML = '';
+            
+            numbers.forEach((number, index) => {
+                setTimeout(() => {
+                    const numberItem = document.createElement('div');
+                    numberItem.className = 'number-item';
+                    numberItem.textContent = number + '번';
+                    numberList.appendChild(numberItem);
+                }, index * 200);
+            });
+        }
+
+        function resetDraw() {
+            const results = document.getElementById('results');
+            results.classList.remove('show');
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('학급 청소당번 뽑기 앱이 로드되었습니다!');
+        });
+    </script>
+</body>
+</html>
